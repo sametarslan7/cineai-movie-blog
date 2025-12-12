@@ -43,17 +43,34 @@
                         <li><i class="fa-regular fa-calendar"></i> <%= movie.year %></li>
                         <li><i class="fa-regular fa-clock"></i> <%= movie.duration %> dk</li>
                         
+                        <!-- YÖNETMEN -->
                         <li class="actors-info">
                             <i class="fa-solid fa-clapperboard"></i> 
-                            <strong>Yönetmen:</strong> <%= movie.director || 'Belirtilmemiş' %>
+                            <strong>Yönetmen:</strong> 
+                            <% if (movie.director) { %>
+                                <!-- GÜNCELLEME: Linkin sonuna film bilgisini ekledik -->
+                                <a href="/director/<%= movie.director.trim() %>?fromMovie=<%= encodeURIComponent(movie.title) %>&fromId=<%= movie._id %>" class="actor-link">
+                                    <%= movie.director %>
+                                </a>
+                            <% } else { %>
+                                Belirtilmemiş
+                            <% } %>
                         </li>
 
+                        <!-- OYUNCULAR -->
                         <li class="actors-info">
                             <i class="fa-solid fa-user-group"></i> 
-                            <strong>Oyuncular:</strong> <%= movie.actors %>
+                            <strong>Oyuncular:</strong> 
+                            <% if (movie.actors) { %>
+                                <% movie.actors.split(',').forEach((actor, index) => { %>
+                                    <!-- GÜNCELLEME: Linkin sonuna film bilgisini ekledik -->
+                                    <a href="/actor/<%= actor.trim() %>?fromMovie=<%= encodeURIComponent(movie.title) %>&fromId=<%= movie._id %>" class="actor-link">
+                                        <%= actor.trim() %>
+                                    </a>
+                                    <%= index < movie.actors.split(',').length - 1 ? ',' : '' %>
+                                <% }) %>
+                            <% } %>
                         </li>
-                        
-                        <li><i class="fa-solid fa-sack-dollar"></i> <%= movie.boxOffice %></li>
                     </ul>
 
                     <p class="summary"><%= movie.summary %></p>

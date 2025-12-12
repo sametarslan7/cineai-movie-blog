@@ -129,26 +129,34 @@ app.get('/movie/:id', async (req, res) => {
             _id: { $ne: movie._id }
         }).limit(3);
 
-        // --- BREADCRUMBS MANTIĞI GÜNCELLENDİ ---
+        // --- BREADCRUMBS GÜNCELLEMESİ ---
         let breadcrumbs = [];
+        const source = req.query.source; // URL'den gelen notu al
 
-        // Eğer URL'de ?source=watchlist varsa:
-        if (req.query.source === 'watchlist') {
+        if (source === 'watchlist') {
+            // İzleme Listesinden gelindiyse
             breadcrumbs = [
                 { name: 'Ana Sayfa', url: '/' },
-                { name: 'İzleme Listem', url: '/watchlist' }, // Araya Watchlist koyduk
+                { name: 'İzleme Listem', url: '/watchlist' },
                 { name: movie.title, url: null }
             ];
         } 
-        // Yoksa (Normal Kategori yolu):
+        else if (source === 'home') {
+            // YENİ: Ana Sayfadan gelindiyse (Kategori gösterme)
+            breadcrumbs = [
+                { name: 'Ana Sayfa', url: '/' },
+                { name: movie.title, url: null }
+            ];
+        }
         else {
+            // Varsayılan (Kategori sayfası, arama vs. üzerinden gelindiyse)
             breadcrumbs = [
                 { name: 'Ana Sayfa', url: '/' },
                 { name: primaryGenre, url: `/genre/${primaryGenre}` },
                 { name: movie.title, url: null }
             ];
         }
-        // ---------------------------------------
+        // --------------------------------
 
         res.render('detail', { 
             movie, 
@@ -168,18 +176,101 @@ app.get('/genre/:genreName', async (req, res) => {
         const genreName = req.params.genreName;
         const filteredMovies = await Movie.find({ genre: { $regex: genreName, $options: 'i' } });
         
-        // --- BREADCRUMBS AYARI ---
         const breadcrumbs = [
             { name: 'Ana Sayfa', url: '/' },
-            { name: genreName, url: null } // Şu anki kategori
+            { name: genreName, url: null }
         ];
 
         res.render('category', { 
-            genreName, 
+            genreName: `📂 Kategori: ${genreName}`, // Başlığı burada düzenledik
             movies: filteredMovies, 
             data: globalData, 
             pageTitle: genreName,
-            breadcrumbs: breadcrumbs // <--- Bunu ekledik
+            breadcrumbs: breadcrumbs
+        });
+    } catch (err) { res.redirect('/'); }
+});
+// --- YENİ: OYUNCU FİLMOGRAFİSİ ---
+// --- OYUNCU FİLMOGRAFİSİ ---
+app.get('/actor/:name', async (req, res) => {
+    try {
+        const globalData = await getGlobalData();
+        const actorName = req.params.name;
+
+        // URL'den gelen önceki film bilgilerini al
+        const { fromMovie, fromId } = req.query;
+        
+        const movies = await Movie.find({ 
+            actors: { $regex: actorName, $options: 'i' } 
+        }).sort({ ai_generated_date: -1 });
+
+        // --- BREADCRUMBS MANTIĞI ---
+        let breadcrumbs = [];
+
+        if (fromMovie && fromId) {
+            // Eğer bir filmden gelindiyse: Ana Sayfa > Film Adı > Oyuncu
+            breadcrumbs = [
+                { name: 'Ana Sayfa', url: '/' },
+                { name: fromMovie, url: `/movie/${fromId}` }, // Önceki filme link veriyoruz
+                { name: `Oyuncu: ${actorName}`, url: null }
+            ];
+        } else {
+            // Doğrudan gelindiyse: Ana Sayfa > Oyuncu
+            breadcrumbs = [
+                { name: 'Ana Sayfa', url: '/' },
+                { name: `Oyuncu: ${actorName}`, url: null }
+            ];
+        }
+        // -----------------------------
+
+        res.render('category', { 
+            genreName: `👤 Oyuncu: ${actorName}`, 
+            movies: movies, 
+            data: globalData, 
+            pageTitle: `${actorName} Filmleri`,
+            breadcrumbs: breadcrumbs
+        });
+    } catch (err) { res.redirect('/'); }
+});
+// --- YENİ: YÖNETMEN FİLMOGRAFİSİ ---
+// --- YÖNETMEN FİLMOGRAFİSİ ---
+app.get('/director/:name', async (req, res) => {
+    try {
+        const globalData = await getGlobalData();
+        const directorName = req.params.name;
+        
+        // URL'den gelen önceki film bilgilerini al
+        const { fromMovie, fromId } = req.query;
+
+        const movies = await Movie.find({ 
+            director: { $regex: directorName, $options: 'i' } 
+        }).sort({ ai_generated_date: -1 });
+
+        // --- BREADCRUMBS MANTIĞI ---
+        let breadcrumbs = [];
+
+        if (fromMovie && fromId) {
+            // Eğer bir filmden gelindiyse: Ana Sayfa > Film Adı > Yönetmen
+            breadcrumbs = [
+                { name: 'Ana Sayfa', url: '/' },
+                { name: fromMovie, url: `/movie/${fromId}` }, // Önceki filme link veriyoruz
+                { name: `Yönetmen: ${directorName}`, url: null }
+            ];
+        } else {
+            // Doğrudan gelindiyse: Ana Sayfa > Yönetmen
+            breadcrumbs = [
+                { name: 'Ana Sayfa', url: '/' },
+                { name: `Yönetmen: ${directorName}`, url: null }
+            ];
+        }
+        // -----------------------------
+
+        res.render('category', { 
+            genreName: `🎬 Yönetmen: ${directorName}`, 
+            movies: movies, 
+            data: globalData, 
+            pageTitle: `${directorName} Filmleri`,
+            breadcrumbs: breadcrumbs
         });
     } catch (err) { res.redirect('/'); }
 });

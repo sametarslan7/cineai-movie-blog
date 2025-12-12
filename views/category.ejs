@@ -17,7 +17,7 @@
         <section class="content-area">
             <!-- BREADCRUMBS BURAYA -->
     <%- include('partials/breadcrumbs') %>
-            <h2 class="section-title">📂 Kategori: <%= genreName %></h2>
+            <h2 class="section-title"><%= genreName %></h2>
             <div class="movie-feed">
                 <% if(movies.length > 0) { %>
                     <% movies.forEach(movie => { %>

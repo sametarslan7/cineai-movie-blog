@@ -900,3 +900,15 @@ footer { text-align: center; padding: 40px; color: var(--text-muted); border-top
     color: var(--primary);
     font-weight: 600;
 }
+/* --- OYUNCU LİNKLERİ --- */
+.actor-link {
+    color: #ddd;
+    text-decoration: none;
+    border-bottom: 1px dotted #666; /* Altına hafif noktalı çizgi */
+    transition: 0.2s;
+}
+
+.actor-link:hover {
+    color: var(--primary); /* Sarı renk */
+    border-bottom: 1px solid var(--primary);
+}
