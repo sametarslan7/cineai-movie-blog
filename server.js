@@ -1,8 +1,10 @@
+require('dotenv').config(); 
+
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const Movie = require('./models/movie');
-
+const OpenAI = require('openai'); // <-- Bunu ekle
 const app = express();
 
 app.set('view engine', 'ejs');
@@ -14,7 +16,13 @@ mongoose.connect(dbURL)
     .then(() => console.log('✅ CineAI Veritabanına Bağlandı'))
     .catch((err) => console.log('❌ Hata:', err));
 
-// --- GLOBAL VERİLER (SIDEBAR İÇİN) ---
+// ... mongoose.connect(...) kodundan sonra:
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY, // .env dosyasındaki keyi kullanır
+});
+
+
 // --- GLOBAL VERİLER (SIDEBAR VE MENÜ İÇİN) ---
 async function getGlobalData() {
     
@@ -167,7 +175,68 @@ app.get('/movie/:id', async (req, res) => {
         });
     } catch (err) { res.redirect('/'); }
 });
+// --- VERSUS (KARŞILAŞTIRMA) SAYFASI ---
+app.get('/versus', async (req, res) => {
+    try {
+        const globalData = await getGlobalData();
+        // Dropdown için tüm filmleri çekiyoruz (İsim ve ID lazım)
+        const allMovies = await Movie.find({},  'title _id posterUrl').sort({ title: 1 });
+        
+        res.render('versus', { 
+            allMovies, 
+            data: globalData, 
+            pageTitle: 'AI Film Karşılaştırma' 
+        });
+    } catch (err) { res.redirect('/'); }
+});
 
+// --- VERSUS API (AI CEVABI İÇİN) ---
+// --- VERSUS API (AI CEVABI İÇİN - GÜNCELLENMİŞ) ---
+app.post('/api/versus', express.json(), async (req, res) => {
+    try {
+        const { id1, id2 } = req.body;
+        
+        const movie1 = await Movie.findById(id1);
+        const movie2 = await Movie.findById(id2);
+
+        if (!movie1 || !movie2) return res.status(404).json({ error: "Film bulunamadı." });
+
+        // GÜNCELLEME 1: Prompt artık HTML şablonunu zorunlu kılıyor.
+        const prompt = `
+        Sen deneyimli, objektif ve biraz da esprili bir film eleştirmenisin.
+        Aşağıdaki iki filmi karşılaştır:
+        A Filmi: "${movie1.title}"
+        B Filmi: "${movie2.title}"
+        
+        Cevabını SADECE aşağıdaki HTML formatında ver. Başlıkları ve yapıyı bozma. Cevabın yarım kalmasın.
+
+        <h3>1. Atmosfer ve Ton Farkı</h3>
+        <p>Buraya iki filmin havasını karşılaştıran kısa bir paragraf yaz.</p>
+
+        <h3>2. Hangisi NeYde Daha İyi?</h3>
+        <ul>
+            <li><strong>${movie1.title}:</strong> Hangi konuda öne çıkıyor? (Senaryo, oyunculuk vb.)</li>
+            <li><strong>${movie2.title}:</strong> Hangi konuda öne çıkıyor?</li>
+        </ul>
+
+        <h3>3. Son Karar: Kim İzlemeli?</h3>
+        <p>Buraya net bir sonuç yaz. "Eğer X seviyorsan A'yı, Y seviyorsan B'yi izle" şeklinde bitir.</p>
+        `;
+
+        const response = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 700, // GÜNCELLEME 2: Token limitini artırdık (Yarım kalmasın diye)
+            temperature: 0.7 // Tutarlılık için biraz düşürdük
+        });
+
+        res.json({ result: response.choices[0].message.content });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "AI şu an cevap veremiyor, lütfen tekrar dene." });
+    }
+});
 // ... (Diğer rotalar aynı kalabilir) ...
 
 app.get('/genre/:genreName', async (req, res) => {

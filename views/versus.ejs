@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Karşılaştırma - CineAI</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- 1. ADIM: CSS Kütüphanesi Buraya (Head içine) -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+</head>
+<body>
+
+    <%- include('partials/navbar') %>
+
+    <div class="main-container no-sidebar">
+        <section class="content-area">
+            <h2 class="section-title">🆚 AI Versus Modu</h2>
+            <p style="text-align: center; color: #aaa; margin-bottom: 30px;">İki film seç, yapay zeka kapıştırsın!</p>
+
+            <!-- SEÇİM ALANI -->
+            <div class="versus-container">
+                <!-- Film 1 -->
+                <div class="fighter-box">
+                    <!-- Varsayılan Resim (Soru İşareti) -->
+                    <div class="poster-preview">
+                        <img id="poster1" src="https://placehold.co/300x450/111/444?text=?" alt="Film 1">
+                    </div>
+                    <select id="movie1" style="width: 100%;">
+                        <option></option> <!-- Placeholder için boş option şart -->
+                        <% allMovies.forEach(m => { %>
+                            <option value="<%= m._id %>" data-poster="<%= m.posterUrl %>"><%= m.title %></option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <!-- VS Logosu -->
+                <div class="vs-logo">VS</div>
+
+                <!-- Film 2 -->
+                <div class="fighter-box">
+                    <!-- Varsayılan Resim (Soru İşareti) -->
+                    <div class="poster-preview">
+                        <img id="poster2" src="https://placehold.co/300x450/111/444?text=?" alt="Film 2">
+                    </div>
+                    <select id="movie2" style="width: 100%;">
+                        <option></option> <!-- Placeholder için boş option şart -->
+                        <% allMovies.forEach(m => { %>
+                            <option value="<%= m._id %>" data-poster="<%= m.posterUrl %>"><%= m.title %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
+
+            <!-- AKSİYON BUTONU -->
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="compareMovies()" class="btn-hero" id="compareBtn">
+                    🔥 Karşılaştır
+                </button>
+            </div>
+
+            <!-- SONUÇ ALANI -->
+            <div id="versus-result" class="versus-result" style="display: none;">
+                <h3>🤖 AI Analizi</h3>
+                <div id="result-content"></div>
+            </div>
+
+        </section>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <!-- 2. ADIM: SCRIPTLER -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Select2 Ayarları
+            $('#movie1').select2({ placeholder: "1. Filmi Seçin...", allowClear: true, width: '100%' });
+            $('#movie2').select2({ placeholder: "2. Filmi Seçin...", allowClear: true, width: '100%' });
+
+            // --- AFİŞ DEĞİŞTİRME MANTIĞI (DÜZELTİLMİŞ) ---
+            
+            // 1. Kutu değiştiğinde
+            $('#movie1').on('select2:select', function (e) {
+                // Seçilen option elementini bul
+                var selectedOption = $(this).find('option:selected');
+                // Onun içindeki data-poster verisini 'attr' ile zorla al
+                var posterUrl = selectedOption.attr('data-poster');
+
+                console.log("Film 1 Seçildi, Poster:", posterUrl); // Hata ayıklama için konsola yazdır
+
+                if (posterUrl) {
+                    $('#poster1').attr('src', posterUrl);
+                    $('#poster1').parent().addClass('active');
+                }
+            });
+
+            // 1. Kutu temizlendiğinde
+            $('#movie1').on('select2:clear', function (e) {
+                $('#poster1').attr('src', 'https://placehold.co/300x450/111/444?text=?');
+                $('#poster1').parent().removeClass('active');
+            });
+
+            // 2. Kutu değiştiğinde
+            $('#movie2').on('select2:select', function (e) {
+                var selectedOption = $(this).find('option:selected');
+                var posterUrl = selectedOption.attr('data-poster');
+
+                console.log("Film 2 Seçildi, Poster:", posterUrl);
+
+                if (posterUrl) {
+                    $('#poster2').attr('src', posterUrl);
+                    $('#poster2').parent().addClass('active');
+                }
+            });
+
+            // 2. Kutu temizlendiğinde
+            $('#movie2').on('select2:clear', function (e) {
+                $('#poster2').attr('src', 'https://placehold.co/300x450/111/444?text=?');
+                $('#poster2').parent().removeClass('active');
+            });
+        });
+
+        async function compareMovies() {
+            // Değerleri jQuery ile al
+            const id1 = $('#movie1').val();
+            const id2 = $('#movie2').val();
+            const btn = document.getElementById('compareBtn');
+            const resultBox = document.getElementById('versus-result');
+            const resultContent = document.getElementById('result-content');
+
+            if (!id1 || !id2) {
+                alert("Lütfen iki film de seç!");
+                return;
+            }
+
+            if (id1 === id2) {
+                alert("Aynı filmi kendisiyle kapıştıramazsın :)");
+                return;
+            }
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analiz Ediliyor...';
+            btn.disabled = true;
+            resultBox.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/versus', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id1, id2 })
+                });
+                
+                const data = await response.json();
+                
+                resultContent.innerHTML = data.result;
+                resultBox.style.display = 'block';
+                resultBox.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                alert("Bir hata oluştu: " + error);
+            } finally {
+                btn.innerHTML = '🔥 Karşılaştır';
+                btn.disabled = false;
+            }
+        }
+    </script>
