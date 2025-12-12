@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= movie.title %> - CineAI</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- NAVBAR (Tüm sayfalarda standart) -->
+    <%- include('partials/navbar') %>
+
+    <div class="main-container" style="margin-top: 40px;">
+        
+        <!-- SOL TARAF: İÇERİK -->
+        <section class="content-area">
+            
+            <%- include('partials/breadcrumbs') %>
+
+            <!-- FİLM DETAY KARTI -->
+            <div class="movie-hero detail-view">
+                <div class="poster-wrapper">
+                    <img src="<%= movie.posterUrl %>" alt="<%= movie.title %>">
+                </div>
+                <div class="movie-info">
+                    <h1><%= movie.title %></h1>
+                    
+                    <div class="tags-container">
+                        <a href="/genre/<%= movie.genre ? movie.genre.split(',')[0] : '' %>" class="genre-tag">
+                            <%= movie.genre ? movie.genre.split(',')[0] : 'Genel' %>
+                        </a>
+                        <% if(movie.tags) { %>
+                            <% movie.tags.forEach(tag => { %>
+                                <span class="hashtag">#<%= tag %></span>
+                            <% }) %>
+                        <% } %>
+                    </div>
+
+                    <ul class="meta-list">
+                        <li><i class="fa-regular fa-calendar"></i> <%= movie.year %></li>
+                        <li><i class="fa-regular fa-clock"></i> <%= movie.duration %> dk</li>
+                        
+                        <li class="actors-info">
+                            <i class="fa-solid fa-clapperboard"></i> 
+                            <strong>Yönetmen:</strong> <%= movie.director || 'Belirtilmemiş' %>
+                        </li>
+
+                        <li class="actors-info">
+                            <i class="fa-solid fa-user-group"></i> 
+                            <strong>Oyuncular:</strong> <%= movie.actors %>
+                        </li>
+                        
+                        <li><i class="fa-solid fa-sack-dollar"></i> <%= movie.boxOffice %></li>
+                    </ul>
+
+                    <p class="summary"><%= movie.summary %></p>
+                    <!-- YENİ: AI VIBE CHECK KUTUSU -->
+                    <% if (movie.vibe && movie.vibe.watch_if) { %>
+                    <div class="ai-vibe-box">
+                        <div class="vibe-header">
+                            <i class="fa-solid fa-robot"></i> <span>AI Vibe Check</span>
+                        </div>
+                        <div class="vibe-grid">
+                            <div class="vibe-item positive">
+                                <i class="fa-solid fa-check-circle"></i>
+                                <div>
+                                    <strong>Bunu İzle:</strong>
+                                    <p><%= movie.vibe.watch_if %></p>
+                                </div>
+                            </div>
+                            <div class="vibe-item negative">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                                <div>
+                                    <strong>Pas Geç:</strong>
+                                    <p><%= movie.vibe.skip_if %></p>
+                                </div>
+                            </div>
+                            <div class="vibe-item atmosphere">
+                                <i class="fa-solid fa-wind"></i>
+                                <div>
+                                    <strong>Atmosfer:</strong>
+                                    <p><%= movie.vibe.atmosphere %></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+                    <div class="action-buttons">
+                        <form action="/like/<%= movie._id %>" method="POST">
+                            <button class="btn-like">❤️ Beğen (<%= movie.likes %>)</button>
+                        </form>
+                        <div class="action-buttons">
+    <form action="/like/<%= movie._id %>" method="POST">
+        <button class="btn-like">❤️ Beğen (<%= movie.likes %>)</button>
+    </form>
+    
+    <!-- YENİ KAYDET BUTONU -->
+    <button class="btn-save btn-watchlist" data-id="<%= movie._id %>" onclick="toggleWatchlist('<%= movie._id %>', this)">
+        <i class="fa-regular fa-bookmark"></i> Listeme Ekle
+    </button>
+</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- YORUMLAR -->
+            <div class="comments-container">
+                <h3>💬 Yorumlar</h3>
+                <form action="/comment/<%= movie._id %>" method="POST" class="comment-form">
+                    <input type="text" name="username" placeholder="Adınız" required>
+                    <select name="rating">
+                        <option value="10">10/10 - Mükemmel</option>
+                        <option value="9">9/10 - Çok İyi</option>
+                        <option value="8">8/10 - İyi</option>
+                        <option value="5">5/10 - Ortalama</option>
+                    </select>
+                    <textarea name="text" placeholder="Yorumunuz..." required></textarea>
+                    <button type="submit">Gönder</button>
+                </form>
+                <% movie.comments.reverse().forEach(c => { %>
+                    <div class="comment-card">
+                        <div class="c-head">
+                            <strong><%= c.username %></strong>
+                            <span>⭐ <%= c.rating %>/10</span>
+                        </div>
+                        <p><%= c.text %></p>
+                    </div>
+                <% }) %>
+            </div>
+
+            <!-- BENZER FİLMLER (ARTIK YORUMLARIN ALTINDA) -->
+            <% if (similarMovies && similarMovies.length > 0) { %>
+            <div class="similar-movies-section">
+                <h3><i class="fa-solid fa-thumbs-up"></i> Bunları da Sevebilirsin</h3>
+                <div class="similar-grid">
+                    <% similarMovies.forEach(sim => { %>
+                        <a href="/movie/<%= sim._id %>" class="similar-card">
+                            <img src="<%= sim.posterUrl %>" alt="<%= sim.title %>">
+                            <div class="sim-info">
+                                <h4><%= sim.title %></h4>
+                                <span><%= sim.year %></span>
+                            </div>
+                        </a>
+                    <% }) %>
+                </div>
+            </div>
+            <% } %>
+
+        </section>
+
+        <!-- SAĞ TARAF: SIDEBAR -->
+        <%- include('partials/sidebar') %>
+
+    </div>
+
+    <!-- FOOTER (Tüm sayfalarda standart) -->
+    <%- include('partials/footer') %>
+
+</body>
+</html>

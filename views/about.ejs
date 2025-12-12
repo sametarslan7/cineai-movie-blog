@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hakkımızda - CineAI</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <%- include('partials/navbar') %>
+
+    <div class="main-container no-sidebar" style="margin-top: 40px;">
+        <section class="content-area">
+            <h2 class="section-title">🚀 Hakkımızda</h2>
+            
+            <div class="widget" style="padding: 40px; line-height: 1.8;">
+                <h1 style="color: var(--primary); margin-bottom: 20px;">CineAI Nedir?</h1>
+                <p>CineAI, sinema tutkunları için geliştirilmiş, <strong>Yapay Zeka (AI)</strong> destekli modern bir film öneri platformudur. Standart öneri listelerinden sıkılanlar için her gün özel bir film seçkisi sunar.</p>
+                
+                <h3 style="margin-top: 30px; color: #fff;">Nasıl Çalışır?</h3>
+                <p>Arka planda çalışan akıllı Python botumuz, OpenAI ve TMDB altyapılarını kullanarak her gün:</p>
+                <ul style="margin-left: 20px; color: #aaa; margin-top: 10px;">
+                    <li>🌍 Sinema dünyasını tarar,</li>
+                    <li>🎬 Kült, popüler veya gizli kalmış filmleri analiz eder,</li>
+                    <li>🖼️ Yüksek çözünürlüklü afişleri ve detaylı bilgileri derler,</li>
+                    <li>🚫 Daha önce önerilen filmleri tekrar etmeden size sunar.</li>
+                </ul>
+
+                <h3 style="margin-top: 30px; color: #fff;">Amacımız</h3>
+                <p>"Bu akşam ne izlesem?" sorusuna en hızlı ve en kaliteli cevabı vermek. CineAI ile saatlerce film aramak yerine, AI'ın seçtiği günün filminin tadını çıkarabilirsiniz.</p>
+                
+                <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 20px;">
+                    <p><em>Proje Geliştiricisi: Samet Arslan</em></p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <%- include('partials/footer') %>
+
+</body>
+</html>

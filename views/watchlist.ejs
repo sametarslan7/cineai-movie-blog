@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İzleme Listem - CineAI</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <%- include('partials/navbar') %>
+
+    <div class="main-container no-sidebar">
+        <section class="content-area">
+            <h2 class="section-title">🔖 İzleme Listem</h2>
+            
+            <div id="empty-msg" style="text-align: center; padding: 50px; display: none;">
+                <i class="fa-regular fa-bookmark" style="font-size: 3rem; color: #333; margin-bottom: 20px;"></i>
+                <p>Listeniz henüz boş.</p>
+                <a href="/" class="read-more">Film Keşfet</a>
+            </div>
+
+            <div id="watchlist-grid" class="movie-feed">
+                <!-- JavaScript burayı dolduracak -->
+            </div>
+        </section>
+    </div>
+
+    <%- include('partials/footer') %>
+
+</body>
+</html>

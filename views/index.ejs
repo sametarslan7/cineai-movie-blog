@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineAI - <%= pageTitle %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- İkonlar için FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo"><i class="fa-solid fa-robot"></i> CineAI</a>
+            <ul class="nav-links">
+                <li><a href="/">Ana Sayfa</a></li>
+                <li><a href="#">Popüler</a></li>
+                <li><a href="#">Hakkımızda</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ANA İÇERİK (GRID YAPISI) -->
+    <div class="main-container">
+        
+        <!-- SOL TARAF: FİLM DETAYI -->
+        <section class="content-area">
+            <% if (movie) { %>
+                <div class="movie-hero">
+                    <div class="poster-wrapper">
+                        <img src="<%= movie.posterUrl %>" alt="<%= movie.title %>">
+                    </div>
+                    <div class="movie-info">
+                        <div class="header-row">
+                            <h1><%= movie.title %> <span class="year">(<%= movie.year %>)</span></h1>
+                            <span class="rating-badge"><i class="fa-solid fa-star"></i> AI Puanı: 9.2</span>
+                        </div>
+
+                        <div class="tags-container">
+                            <span class="genre-tag"><%= movie.genre %></span>
+                            <% if(movie.tags && movie.tags.length > 0) { %>
+                                <% movie.tags.forEach(tag => { %>
+                                    <a href="/tag/<%= tag %>" class="hashtag">#<%= tag %></a>
+                                <% }) %>
+                            <% } %>
+                        </div>
+
+                        <ul class="meta-list">
+                            <li><i class="fa-regular fa-clock"></i> <%= movie.duration %> dk</li>
+                            <li><i class="fa-solid fa-users"></i> <%= movie.actors %></li>
+                            <li><i class="fa-solid fa-money-bill"></i> <%= movie.boxOffice %></li>
+                        </ul>
+
+                        <p class="summary"><%= movie.summary %></p>
+
+                        <!-- ETKİLEŞİM BUTONLARI -->
+                        <div class="action-buttons">
+                            <form action="/like/<%= movie._id %>" method="POST" style="display:inline;">
+                                <button type="submit" class="btn-like">
+                                    <i class="fa-solid fa-heart"></i> Beğen (<%= movie.likes || 0 %>)
+                                </button>
+                            </form>
+                            <button onclick="shareMovie()" class="btn-share"><i class="fa-solid fa-share-nodes"></i> Paylaş</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- YORUMLAR -->
+                <div class="comments-container">
+                    <h3><i class="fa-regular fa-comments"></i> İzleyici Yorumları</h3>
+                    
+                    <form action="/comment/<%= movie._id %>" method="POST" class="comment-form">
+                        <input type="text" name="username" placeholder="Adın nedir?" required>
+                        <select name="rating">
+                            <option value="10">10 - Efsane</option>
+                            <option value="8">8 - Çok İyi</option>
+                            <option value="5">5 - Ortalama</option>
+                        </select>
+                        <textarea name="text" placeholder="Film hakkında ne düşünüyorsun?" required></textarea>
+                        <button type="submit">Yorumu Gönder</button>
+                    </form>
+
+                    <div class="comment-list">
+                        <% movie.comments.reverse().forEach(comment => { %>
+                            <div class="comment-card">
+                                <div class="c-head">
+                                    <strong><%= comment.username %></strong>
+                                    <span><%= comment.rating %>/10</span>
+                                </div>
+                                <p><%= comment.text %></p>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="no-movie">
+                    <h2>Henüz film seçilmedi. Bot çalışıyor...</h2>
+                </div>
+            <% } %>
+        </section>
+
+        <!-- SAĞ TARAF: SIDEBAR (GEÇMİŞ ÖNERİLER) -->
+        <aside class="sidebar">
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> Önceki Öneriler</h3>
+            <div class="sidebar-list">
+                <% sidebarMovies.forEach(m => { %>
+                    <a href="/movie/<%= m._id %>" class="sidebar-item">
+                        <img src="<%= m.posterUrl %>" alt="Poster">
+                        <div class="s-info">
+                            <h4><%= m.title %></h4>
+                            <span><%= m.year %> • <%= m.genre %></span>
+                        </div>
+                    </a>
+                <% }) %>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2025 CineAI - Yapay Zeka Destekli Sinema Bloğu</p>
+    </footer>
+
+    <script>
+        function shareMovie() {
+            alert("Link kopyalandı: " + window.location.href);
+        }
+    </script>
+</body>
+</html>

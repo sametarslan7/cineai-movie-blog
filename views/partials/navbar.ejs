@@ -1,0 +1,30 @@
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="/" class="logo"><i class="fa-solid fa-robot"></i> CineAI</a>
+        <!-- HAMBURGER MENÜ BUTONU (YENİ) -->
+        <div class="hamburger" id="hamburger-btn">
+            <i class="fa-solid fa-bars"></i>
+        </div>
+        <ul class="nav-links" id="nav-menu">
+            <li><a href="/">Ana Sayfa</a></li>
+            
+            <!-- DROPDOWN MENÜ -->
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Kategoriler <i class="fa-solid fa-caret-down"></i></a>
+                <div class="dropdown-content">
+                    <% data.uniqueGenres.forEach(genre => { %>
+                        <a href="/genre/<%= genre %>"><%= genre %></a>
+                    <% }) %>
+                </div>
+            </li>
+
+            <li><a href="/about">Hakkımızda</a></li>
+            <li><a href="/watchlist">İzleme Listem</a></li>
+        </ul>
+        <!-- YENİ EKLENEN ARAMA ÇUBUĞU -->
+        <form action="/search" method="GET" class="search-form">
+            <input type="text" name="q" placeholder="Film ara..." required autocomplete="off">
+            <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </form>
+    </div>
+</nav>

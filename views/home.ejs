@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineAI - <%= pageTitle %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <!-- NAVBAR -->
+    <%- include('partials/navbar') %>
+
+    <!-- HERO SLIDER SECTION (YENİ) -->
+    <% if (sliderMovies && sliderMovies.length > 0) { %>
+    <div class="hero-slider-container">
+        <div class="hero-wrapper" id="heroWrapper">
+            
+            <% sliderMovies.forEach((movie, index) => { %>
+                <div class="hero-slide" style="background-image: linear-gradient(to right, #0f1014 40%, transparent), url('<%= movie.posterUrl %>');">
+                    <div class="hero-content">
+                        <span class="badge">✨ Yeni Öneri #<%= index + 1 %></span>
+                        <h1><%= movie.title %></h1>
+                        <p class="hero-meta"><i class="fa-regular fa-calendar"></i> <%= movie.year %> | <%= movie.genre.split(',')[0] %></p>
+                        <p class="hero-summary"><%= movie.summary.substring(0, 150) %>...</p>
+                        <a href="/movie/<%= movie._id %>" class="btn-hero">İncelemeyi Oku <i class="fa-solid fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            <% }) %>
+
+        </div>
+        
+        <!-- Slider Noktaları (Navigasyon) -->
+        <div class="slider-dots">
+    <% sliderMovies.forEach((_, index) => { %>
+        <!-- onclick sildik, data-index ekledik -->
+        <span class="dot <%= index === 0 ? 'active' : '' %>" data-index="<%= index %>"></span>
+    <% }) %>
+    </div>
+    </div>
+    <% } %>
+
+    <!-- ANA İÇERİK ALANI -->
+    <div class="main-container">
+        
+        <!-- SOL SÜTUN -->
+        <section class="content-area">
+            
+            <div class="mood-container">
+                <h3>Bugün modun nasıl?</h3>
+                <div class="mood-list">
+                    <a href="/mood/Mutlu" class="mood-btn">😄 <span>Mutlu</span></a>
+                    <a href="/mood/Hüzünlü" class="mood-btn">😢 <span>Hüzünlü</span></a>
+                    <a href="/mood/Gergin" class="mood-btn">😬 <span>Gergin</span></a>
+                    <a href="/mood/Heyecanlı" class="mood-btn">🤩 <span>Heyecanlı</span></a>
+                    <a href="/mood/Düşündürücü" class="mood-btn">🤔 <span>Düşündürücü</span></a>
+                    <a href="/mood/Korkmuş" class="mood-btn">😱 <span>Korkmuş</span></a>
+                    <a href="/mood/Rahat" class="mood-btn">☕ <span>Rahat</span></a>
+                </div>
+            </div>
+            
+            <h2 class="section-title">🎞️ Diğer Öneriler</h2>
+            
+            <!-- FİLM LİSTESİ -->
+            <div class="movie-feed">
+                <% movies.forEach(movie => { %>
+                    <article class="movie-card-horizontal">
+                        <div class="card-poster">
+                            <img src="<%= movie.posterUrl %>" alt="<%= movie.title %>">
+                               <!-- Beğeni balonu varsa kalsın, biz bunu ekliyoruz: -->
+    <button class="btn-watchlist" data-id="<%= movie._id %>" onclick="toggleWatchlist('<%= movie._id %>', this)">
+        <i class="fa-regular fa-bookmark"></i>
+    </button>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-header">
+                                <div class="header-meta">
+                                    <span class="tag"><%= movie.genre ? movie.genre.split(',')[0] : 'Genel' %></span>
+                                    <span class="inline-likes"><i class="fa-solid fa-heart"></i> <%= movie.likes %></span>
+                                </div>
+                                <h3><%= movie.title %> <span class="year">(<%= movie.year %>)</span></h3>
+                            </div>
+                            <p class="short-summary"><%= movie.summary.substring(0, 180) %>...</p>
+                            <div class="card-footer">
+                                <span><i class="fa-regular fa-clock"></i> <%= movie.duration %> dk</span>
+                                <a href="/movie/<%= movie._id %>" class="read-more">Devamını Oku <i class="fa-solid fa-angle-right"></i></a>
+                            </div>
+                        </div>
+                    </article>
+                <% }) %>
+            </div>
+
+            <!-- SAYFALAMA -->
+            <% if (totalPages > 1) { %>
+            <div class="pagination">
+                <% if (currentPage > 1) { %>
+                    <a href="/?page=<%= currentPage - 1 %>" class="page-arrow prev"><i class="fa-solid fa-arrow-left"></i> Önceki</a>
+                <% } else { %> <div></div> <% } %>
+
+                <div class="page-info">Sayfa <%= currentPage %> / <%= totalPages %></div>
+
+                <% if (currentPage < totalPages) { %>
+                    <a href="/?page=<%= currentPage + 1 %>" class="page-arrow next">Sonraki Sayfa <i class="fa-solid fa-arrow-right"></i></a>
+                <% } %>
+            </div>
+            <% } %>
+
+        </section>
+
+        <!-- SIDEBAR -->
+        <%- include('partials/sidebar') %>
+
+    </div> 
+    
+    <!-- FOOTER -->
+    <%- include('partials/footer') %>
+
+    <!-- SLIDER SCRIPT -->
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.hero-slide');
+        const wrapper = document.getElementById('heroWrapper');
+        const dots = document.querySelectorAll('.dot');
+        const totalSlides = slides.length;
+
+        function updateSlider() {
+            // Kaydırma işlemi (Yüzde hesaplama)
+            wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+            
+            // Noktaları güncelle
+            dots.forEach(dot => dot.classList.remove('active'));
+            if(dots[currentSlide]) dots[currentSlide].classList.add('active');
+        }
+
+        function nextSlide() {
+            currentSlide++;
+            if (currentSlide >= totalSlides) {
+                currentSlide = 0; // Başa dön
+            }
+            updateSlider();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlider();
+        }
+
+        // 3 Saniyede bir değiştir (3000ms)
+        setInterval(nextSlide, 3000);
+    </script>
+
+</body>
+</html>

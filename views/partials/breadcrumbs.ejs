@@ -1,0 +1,21 @@
+<!-- views/partials/breadcrumbs.ejs -->
+<% if (typeof breadcrumbs !== 'undefined' && breadcrumbs.length > 0) { %>
+    <nav class="breadcrumbs">
+        <% breadcrumbs.forEach((crumb, index) => { %>
+            
+            <% if (crumb.url) { %>
+                <!-- Tıklanabilir Link -->
+                <a href="<%= crumb.url %>"><%= crumb.name %></a>
+            <% } else { %>
+                <!-- Mevcut Sayfa (Link yok) -->
+                <span class="current"><%= crumb.name %></span>
+            <% } %>
+
+            <!-- Araya ok işareti koy (Son eleman hariç) -->
+            <% if (index < breadcrumbs.length - 1) { %>
+                <span class="separator"><i class="fa-solid fa-chevron-right"></i></span>
+            <% } %>
+
+        <% }) %>
+    </nav>
+<% } %>

@@ -1,0 +1,10 @@
+# Modüller ve Kütüphaneler
+node_modules/
+__pycache__/
+
+# Çevresel Değişkenler (Şifreler)
+.env
+
+# Sistem dosyaları
+.DS_Store
+Thumbs.db

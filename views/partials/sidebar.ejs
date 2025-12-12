@@ -1,0 +1,35 @@
+<aside class="sidebar">
+    
+    <!-- WIDGET 1: Popüler Filmler (Beğeni Sayısına Göre) -->
+    <div class="widget">
+        <h3>🔥 En Popüler</h3>
+        <div class="top-movies-list">
+            <% data.topMovies.forEach(m => { %>
+                <a href="/movie/<%= m._id %>" class="mini-card">
+                    <img src="<%= m.posterUrl %>" alt="">
+                    <div class="mini-info">
+                        <span class="m-title"><%= m.title %></span>
+                        <small class="stat-badge likes">❤️ <%= m.likes %></small>
+                    </div>
+                </a>
+            <% }) %>
+        </div>
+    </div>
+
+    
+    <!-- WIDGET 3: Rastgele Öneri - YENİ -->
+    <% if(data.randomMovie) { %>
+    <div class="widget random-widget" style="background: linear-gradient(135deg, #f5c518 0%, #d4a000 100%); color: #000;">
+        <h3>🎲 Ne İzlesem?</h3>
+        <p style="font-size:0.9rem; margin-bottom:10px;">Karar veremedin mi? İşte sana özel bir öneri:</p>
+        <div class="mini-card" style="border:none; background: rgba(255,255,255,0.2); border-radius:8px; padding:10px;">
+            <img src="<%= data.randomMovie.posterUrl %>" alt="" style="width:50px; height:75px; border-radius:4px;">
+            <div class="mini-info">
+                <span class="m-title" style="color:#000; font-weight:800;"><%= data.randomMovie.title %></span>
+                <a href="/movie/<%= data.randomMovie._id %>" style="font-size:0.8rem; text-decoration:underline; font-weight:bold;">İncelemeye Git →</a>
+            </div>
+        </div>
+    </div>
+    <% } %>
+
+</aside>

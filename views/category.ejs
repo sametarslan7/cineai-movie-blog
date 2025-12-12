@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= genreName %> Filmleri - CineAI</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <%- include('partials/navbar') %>
+
+    <div class="main-container" style="margin-top:40px;">
+        <section class="content-area">
+            <!-- BREADCRUMBS BURAYA -->
+    <%- include('partials/breadcrumbs') %>
+            <h2 class="section-title">📂 Kategori: <%= genreName %></h2>
+            <div class="movie-feed">
+                <% if(movies.length > 0) { %>
+                    <% movies.forEach(movie => { %>
+                        <article class="movie-card-horizontal">
+                            <div class="card-poster">
+                                <img src="<%= movie.posterUrl %>" alt="<%= movie.title %>">
+                                <div class="card-poster">
+    <img src="<%= movie.posterUrl %>" alt="<%= movie.title %>">
+    <!-- Beğeni balonu varsa kalsın, biz bunu ekliyoruz: -->
+    <button class="btn-watchlist" data-id="<%= movie._id %>" onclick="toggleWatchlist('<%= movie._id %>', this)">
+        <i class="fa-regular fa-bookmark"></i>
+    </button>
+</div>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-header">
+                                    <div class="header-meta">
+                                        <!-- KATEGORİ ADI ZATEN SAYFA BAŞLIĞINDA VAR AMA YİNE DE KOYABİLİRİZ -->
+                                        <span class="inline-likes" style="margin-left:0;"><i class="fa-solid fa-heart"></i> <%= movie.likes %> Beğeni</span>
+                                    </div>
+                                    <h3><%= movie.title %> <span class="year">(<%= movie.year %>)</span></h3>
+                                </div>
+                                <p class="short-summary"><%= movie.summary.substring(0, 150) %>...</p>
+                                <a href="/movie/<%= movie._id %>" class="read-more">İncele</a>
+                            </div>
+                        </article>
+                    <% }) %>
+                <% } else { %>
+                    <p style="text-align:center; padding:20px; color:#aaa;">Bu kategoride henüz film yok.</p>
+                <% } %>
+            </div>
+        </section>
+        
+        <!-- SIDEBAR -->
+        <%- include('partials/sidebar') %>
+    </div>
+
+    <!-- FOOTER -->
+    <%- include('partials/footer') %>
+
+</body>
+</html>
