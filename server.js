@@ -1,5 +1,5 @@
 require('dotenv').config(); 
-
+const cookieParser = require('cookie-parser');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -9,6 +9,7 @@ const app = express();
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const dbURL = "mongodb+srv://sametarslan:sampersie29@cluster0.bwicwso.mongodb.net/MovieBlogDB?retryWrites=true&w=majority";
@@ -131,13 +132,14 @@ app.get('/movie/:id', async (req, res) => {
         const globalData = await getGlobalData();
         const movie = await Movie.findById(req.params.id);
         
+        // Benzer Filmler Mantığı
         const primaryGenre = movie.genre ? movie.genre.split(',')[0].trim() : "Genel";
         const similarMovies = await Movie.find({
             genre: { $regex: primaryGenre, $options: 'i' },
             _id: { $ne: movie._id }
         }).limit(3);
 
-        // --- BREADCRUMBS GÜNCELLEMESİ ---
+        // --- BREADCRUMBS MANTIĞI ---
         let breadcrumbs = [];
         const source = req.query.source; // URL'den gelen notu al
 
@@ -150,30 +152,37 @@ app.get('/movie/:id', async (req, res) => {
             ];
         } 
         else if (source === 'home') {
-            // YENİ: Ana Sayfadan gelindiyse (Kategori gösterme)
+            // Ana Sayfadan gelindiyse
             breadcrumbs = [
                 { name: 'Ana Sayfa', url: '/' },
                 { name: movie.title, url: null }
             ];
         }
         else {
-            // Varsayılan (Kategori sayfası, arama vs. üzerinden gelindiyse)
+            // Varsayılan (Kategori vb.)
             breadcrumbs = [
                 { name: 'Ana Sayfa', url: '/' },
                 { name: primaryGenre, url: `/genre/${primaryGenre}` },
                 { name: movie.title, url: null }
             ];
         }
-        // --------------------------------
+
+        // --- YENİ EKLENEN KISIM: BEĞENİ DURUMU KONTROLÜ ---
+        // Kullanıcının tarayıcısında 'liked_FILMID' çerezi var mı?
+        const isLiked = req.cookies[`liked_${movie._id}`] ? true : false;
 
         res.render('detail', { 
             movie, 
             similarMovies, 
             data: globalData, 
             pageTitle: movie.title,
-            breadcrumbs: breadcrumbs 
+            breadcrumbs: breadcrumbs,
+            isLiked: isLiked // <-- Bu bilgiyi sayfaya gönderiyoruz
         });
-    } catch (err) { res.redirect('/'); }
+    } catch (err) { 
+        console.log(err);
+        res.redirect('/'); 
+    }
 });
 // --- VERSUS (KARŞILAŞTIRMA) SAYFASI ---
 app.get('/versus', async (req, res) => {
@@ -362,10 +371,32 @@ app.get('/mood/:moodName', async (req, res) => {
         res.redirect('/');
     }
 });
+// --- BEĞENİ (LIKE/UNLIKE) ROTASI ---
 app.post('/like/:id', async (req, res) => {
-    await Movie.findByIdAndUpdate(req.params.id, { $inc: { likes: 1 } });
-    const backURL = req.get('Referer') || '/';
-    res.redirect(backURL);
+    try {
+        const movieId = req.params.id;
+        const cookieName = `liked_${movieId}`; // Her filme özel çerez ismi: 'liked_12345'
+        const hasLiked = req.cookies[cookieName]; // Kullanıcı daha önce beğenmiş mi?
+
+        if (hasLiked) {
+            // ZATEN BEĞENMİŞ -> GERİ AL (UNLIKE)
+            await Movie.findByIdAndUpdate(movieId, { $inc: { likes: -1 } });
+            res.clearCookie(cookieName); // Çerezi sil
+        } else {
+            // HENÜZ BEĞENMEMİŞ -> BEĞEN (LIKE)
+            await Movie.findByIdAndUpdate(movieId, { $inc: { likes: 1 } });
+            // Çerezi kaydet (1 yıl boyunca hatırlar)
+            res.cookie(cookieName, 'true', { maxAge: 365 * 24 * 60 * 60 * 1000, httpOnly: true });
+        }
+
+        // Geldiği sayfaya geri dön
+        const backURL = req.get('Referer') || '/';
+        res.redirect(backURL);
+
+    } catch (err) {
+        console.log(err);
+        res.redirect('/');
+    }
 });
 
 app.post('/comment/:id', async (req, res) => {

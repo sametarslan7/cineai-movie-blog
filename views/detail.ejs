@@ -107,18 +107,24 @@
                     <% } %>
                     <div class="action-buttons">
                         <form action="/like/<%= movie._id %>" method="POST">
-                            <button class="btn-like">❤️ Beğen (<%= movie.likes %>)</button>
-                        </form>
-                        <div class="action-buttons">
-    <form action="/like/<%= movie._id %>" method="POST">
-        <button class="btn-like">❤️ Beğen (<%= movie.likes %>)</button>
+        <% if (typeof isLiked !== 'undefined' && isLiked) { %>
+            <!-- Eğer beğenmişse: Buton Dolu ve Kırmızı Olsun -->
+            <button class="btn-like liked" style="background-color: #e50914; border: 2px solid #e50914;">
+                <i class="fa-solid fa-heart"></i> Beğendin (<%= movie.likes %>)
+            </button>
+        <% } else { %>
+            <!-- Beğenmemişse: Normal Buton -->
+            <button class="btn-like">
+                <i class="fa-regular fa-heart"></i> Beğen (<%= movie.likes %>)
+            </button>
+        <% } %>
     </form>
-    
+                        
     <!-- YENİ KAYDET BUTONU -->
     <button class="btn-save btn-watchlist" data-id="<%= movie._id %>" onclick="toggleWatchlist('<%= movie._id %>', this)">
         <i class="fa-regular fa-bookmark"></i> Listeme Ekle
     </button>
-</div>
+
                     </div>
                 </div>
             </div>
